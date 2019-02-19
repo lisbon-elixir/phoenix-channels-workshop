@@ -140,7 +140,7 @@
   ```html.eex
   # lib/restaurants_web/templates/restaurant/index.html.eex
 
-  <div style="height:360px; width:800;" id="mapid"></div>
+  <div style="height:720px; width:1280px;" id="mapid"></div>
   <script type="text/javascript">
     window.mymap = L.map('mapid').setView([38.71667, -9.16667], 13);
 
@@ -153,6 +153,20 @@
       noWrap: true
     }).addTo(window.mymap);
   </script>
+  ```
+
+- Update max width on main container
+
+  ```html
+  # assets/css/phoenix.css
+
+  # ...
+  .container {
+    # ...
+    max-width: 133.0rem;
+    # ...
+  }
+  # ...
   ```
 
 - Visit [`http://localhost:4000/restaurants`](http://localhost:4000/restaurants) and you should see something like the following:
