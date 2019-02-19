@@ -17,6 +17,7 @@ defmodule RestaurantsWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/restaurants", RestaurantController, :index
   end
 
   # Other scopes may use custom stacks.
