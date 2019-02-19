@@ -22,6 +22,10 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :tomato,
+  zomato_api_key: "06f7e6b2df1c9baf49e3a69a3defac49",
+  zomato_api_uri: "https://developers.zomato.com/api/v2.1/"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
