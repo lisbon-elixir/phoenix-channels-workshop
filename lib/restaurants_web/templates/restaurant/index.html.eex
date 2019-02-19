@@ -1,6 +1,7 @@
 <div style="height:720px; width:1280px;" id="mapid"></div>
 <script type="text/javascript">
   window.mymap = L.map('mapid').setView([38.71667, -9.16667], 13);
+  window.layerGroup = L.layerGroup().addTo(window.mymap);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CartoDB</a>',

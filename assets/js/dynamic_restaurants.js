@@ -2,6 +2,7 @@ import {channel} from "./socket"
 
 let DynamicRestaurants = {
   init() {
+    window.mymap.on('moveend', this.handleMapMove);
     this.getRestaurants(window.mymap.getCenter())
   },
 
@@ -16,8 +17,13 @@ let DynamicRestaurants = {
   },
 
   renderRestaurant(lat, long, name, url) {
-    const marker = window.L.marker(window.L.latLng(lat, long)).addTo(window.mymap);
+    const marker = window.L.marker(window.L.latLng(lat, long)).addTo(window.layerGroup);
     marker.bindPopup(`<a href="${url}">${name}</a></br>`)
+  },
+
+  handleMapMove() {
+    window.layerGroup.clearLayers()
+    DynamicRestaurants.getRestaurants(window.mymap.getCenter())
   }
 }
 
