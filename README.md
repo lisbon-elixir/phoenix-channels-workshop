@@ -414,6 +414,115 @@
 
 ![](images/7.gif)
 
+### Step 8: Broadcast favorite restaurants from server
+
+- Add handler for `get_favorite_restaurants` message
+
+  ```js
+  // assets/js/dynamic_restaurants.js
+
+  let DynamicRestaurants = {
+  init() {
+    window.mymap.on('moveend', this.handleMapMove);
+    channel.on("get_favorite_restaurants", ({restaurants}) =>
+      restaurants.forEach(r => {
+        this.renderFavoriteRestaurant(r.latitude, r.longitude, r.name, r.url)
+      })
+    )
+
+    // ...
+
+    renderFavoriteRestaurant(lat, long, name, url) {
+      const icon = window.L.divIcon({
+        iconAnchor: [6, 60],
+        popupAnchor: [0, -50],
+        className: 'no-background',
+        html: '<div class="fa fa-star fa-big orange"></div>'
+      });
+
+      const favorite_marker = window.L.marker(L.latLng(lat, long), {
+        icon
+      }).addTo(window.layerGroup);
+
+      favorite_marker.bindPopup(`<a href="${url}">${name}</a></br>`)
+    },
+
+    // ...
+  ```
+
+- Update `app.css` with necessary classes to render stars above markers
+
+  ```css
+  /* assets/css/app.css */
+
+  /* ... */
+
+  .orange {
+    color: orange;
+  }
+
+  .fa-big {
+    transform: scale(1.5, 1.5);
+  }
+
+  .no-background {
+    background: transparent;
+  }
+
+  @import "./phoenix.css";
+  ```
+
+- Add `link` tag to FontAwesome (to user the star icon)
+
+  ```html.eex
+  # lib/restaurants_web/templates/layout/app.html.eex
+
+  # ...
+  <head>
+    # ...
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    # ...
+  </head>
+  # ...
+  ```
+
+- Asynchronously process favorite restaurants in the server (and broadcast them)
+
+  ```elixir
+  # lib/restaurants_web/channels/user_channel.ex
+
+  # ...
+
+  def handle_in("get_restaurants", %{"coords" => %{"lat" => lat, "lng" => lng}}, socket) do
+
+    # ...
+
+    spawn_link(__MODULE__, :process_favorite_restaurants, [socket, restaurants])
+
+    # ...
+
+    def process_favorite_restaurants(socket, restaurants) do
+      favorite_restaurants =
+        restaurants
+        |> Enum.filter(fn restaurant ->
+          restaurant
+          |> Map.get("restaurant")
+          |> Map.get("user_rating")
+          |> Map.get("aggregate_rating")
+          |> String.to_float()
+          |> Kernel.>(4.7)
+        end)
+        |> Enum.map(&render_restaurant/1)
+
+      broadcast!(socket, "get_favorite_restaurants", %{restaurants: favorite_restaurants})
+    end
+  end
+  ```
+
+- Visit [`http://localhost:4000/restaurants`](http://localhost:4000/restaurants) and you should see something like the following:
+
+![](images/8.gif)
+
 ---
 
 The End.

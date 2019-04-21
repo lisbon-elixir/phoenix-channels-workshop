@@ -10,6 +10,8 @@ defmodule RestaurantsWeb.UserChannel do
   def handle_in("get_restaurants", %{"coords" => %{"lat" => lat, "lng" => lng}}, socket) do
     {:ok, %{"nearby_restaurants" => restaurants}} = Tomato.geocode(lat, lng)
 
+    spawn_link(__MODULE__, :process_favorite_restaurants, [socket, restaurants])
+
     response =
       restaurants
       |> Enum.map(&render_restaurant/1)
@@ -24,5 +26,21 @@ defmodule RestaurantsWeb.UserChannel do
       latitude: restaurant["location"]["latitude"],
       longitude: restaurant["location"]["longitude"]
     }
+  end
+
+  def process_favorite_restaurants(socket, restaurants) do
+    favorite_restaurants =
+      restaurants
+      |> Enum.filter(fn restaurant ->
+        restaurant
+        |> Map.get("restaurant")
+        |> Map.get("user_rating")
+        |> Map.get("aggregate_rating")
+        |> String.to_float()
+        |> Kernel.>(4.7)
+      end)
+      |> Enum.map(&render_restaurant/1)
+
+      broadcast!(socket, "get_favorite_restaurants", %{restaurants: favorite_restaurants})
   end
 end
